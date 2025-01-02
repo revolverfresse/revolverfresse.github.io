@@ -1,0 +1,110 @@
+<html>
+<head>
+<script src="complex.min.js"></script>
+</head>
+<body>
+<canvas id="cv1" width=100 height=100 style="widht:40%;height:90%"></canvas>
+<canvas id="cv2" width=100 height=100 style="widht:40%;height:90%"></canvas>
+
+<script>
+let rands = new Float32Array(1024)
+for(let i = 0;i < rands.length;++i) rands[i] = 2 * (Math.random() - 0.5)
+
+let r = 0
+function nr() {
+	return rands[r++]
+}
+
+function f(c) {
+	r = 0
+	return c.pow(c.div(c.add(nr(),nr()))).mul(c.div(c.add(nr(),nr()))).add(new Complex(nr(),nr()).div(c.add(nr(),nr())))
+}
+
+
+let mousex = 0
+let mousey = 0
+
+function render() {
+	let x
+	let y
+	
+	let cv1 = document.getElementById("cv1")
+	let ctx1 = cv1.getContext("2d")
+	let cv2 = document.getElementById("cv2")
+	let ctx2 = cv2.getContext("2d")
+	
+	ctx1.fillStyle = "black"
+	ctx1.fillRect(0,0,cv1.width,cv1.height)
+	for(let a = 0;a < cv1.width;++a) {
+		for(let b = 0;b < cv1.height;++b) {
+			let c = new Complex(10 * (a / cv1.width - 0.5),10 * (b / cv1.height - 0.5))
+			let i
+			for(i = 0;i < 100;++i) {
+				c = f(c)
+				if(c.abs() > 4) break;
+			}
+			let cr
+			let cg
+			let cb
+			
+			if(i >= 100) {
+				cr = cb = cg = 0
+			}else {
+				cr = 120 * (Math.sin(i * 0.1) + 1)
+				cb = 120 * (Math.sin(i * 0.2) + 1)
+				cg = 120 * (Math.sin(i * 0.3) + 1)
+			}
+			
+			ctx1.fillStyle = "rgb("+cr+","+cg+","+cb+")"
+			ctx1.fillRect(a,b,2,2)
+		}
+	}
+	
+	x = (mousex / 10 + 0.5) * cv1.width
+	y = (mousey / 10 + 0.5) * cv1.height
+	ctx1.beginPath()
+	ctx1.moveTo(x,0)
+	ctx1.lineTo(x,cv1.height)
+	ctx1.moveTo(0,y)
+	ctx1.lineTo(cv1.width,y)
+	ctx1.strokeStyle = "white"
+	ctx1.linewidth = 2
+	ctx1.stroke()
+	
+	ctx2.fillStyle = "black"
+	ctx2.fillRect(0,0,cv2.width,cv2.height)
+	ctx2.fillStyle = "white"
+	
+	let c = new Complex(mousex,mousey)
+	for(let i = 0;i < 100;++i) {
+		c = f(c)
+		x = (c.re / 10 + 0.5) * cv2.width
+		y = (c.im / 10 + 0.5) * cv2.height
+		ctx2.fillRect(x,y,3,3)
+	}
+}
+
+
+document.getElementById("cv1").addEventListener("mousemove",(evt) => {
+	let cv1 = document.getElementById("cv1")
+	let ctx1 = cv1.getContext("2d")
+	let cv2 = document.getElementById("cv2")
+	let ctx2 = cv2.getContext("2d")
+
+	mousex = 10 * (evt.offsetX / cv1.offsetWidth - 0.5)
+	mousey = 10 * (evt.offsetY / cv1.offsetHeight - 0.5)
+})
+
+function myEvent() {
+	render()
+	for(let i = 0;i < rands.length;++i) rands[i] += 0.1 * (Math.random() - 0.5)
+	window.setTimeout(myEvent,10)		
+}
+
+myEvent()
+</script>
+
+</body>
+</html>
+
+

@@ -3,9 +3,13 @@
 <script src="complex.min.js"></script>
 </head>
 <body>
-<canvas id="cv1" width=100 height=100 style="widht:40%;height:90%"></canvas>
-<canvas id="cv2" width=100 height=100 style="widht:40%;height:90%"></canvas>
+<canvas id="cv1" width=100 height=100 style="width:30%;height:90%"></canvas>
+<canvas id="cv2" width=100 height=100 style="width:30%;height:90%"></canvas>
 
+<fieldset style="width:30%;height:90%;float:right">
+<legend>Parameters</legend>
+<span id="params"></span>
+</fieldset>
 <script>
 let rands = new Float32Array(1024)
 for(let i = 0;i < rands.length;++i) rands[i] = 2 * (Math.random() - 0.5)
@@ -20,6 +24,9 @@ function f(c) {
 	return c.pow(c.div(c.add(nr(),nr()))).mul(c.div(c.add(nr(),nr()))).add(new Complex(nr(),nr()).div(c.add(nr(),nr())))
 }
 
+f(new Complex(0,0))
+let ps = document.getElementById("params")
+for(let i = 0;i < r;++i) ps.innerHTML += "<input id='param" + i + "' onchange='render()' type='range' min=-1000 max=1000 value=" + 1000 * rands[i] + " style='width:95%'><br><span id='ptext" + i + "'>" + rands[i] + "<span>"
 
 let mousex = 0
 let mousey = 0
@@ -27,6 +34,12 @@ let mousey = 0
 function render() {
 	let x
 	let y
+	
+	let p
+	let j = 0
+	while(p = document.getElementById("param" + j)) {rands[j] = p.value / 1000.0;j += 1}
+	j = 0
+	while(p = document.getElementById("ptext" + j)) {p.innerHTML = rands[j];j += 1}
 	
 	let cv1 = document.getElementById("cv1")
 	let ctx1 = cv1.getContext("2d")
@@ -93,15 +106,11 @@ document.getElementById("cv1").addEventListener("mousemove",(evt) => {
 
 	mousex = 10 * (evt.offsetX / cv1.offsetWidth - 0.5)
 	mousey = 10 * (evt.offsetY / cv1.offsetHeight - 0.5)
+
+	render()
 })
 
-function myEvent() {
-	render()
-	for(let i = 0;i < rands.length;++i) rands[i] += 0.1 * (Math.random() - 0.5)
-	window.setTimeout(myEvent,10)		
-}
-
-myEvent()
+render()
 </script>
 
 </body>
